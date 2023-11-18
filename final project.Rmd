@@ -1,0 +1,156 @@
+---
+title: "STA305 Final Project"
+author: 'Afnan Rahman; ID: 1004973031'
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+---
+
+##I. Description: 
+  Students amidst the pandemic have been struggling with  with mental health especially during the month oof April due to the increased deadlines and exam period. The virtual fatigue and lack of social connectivity are deteriorating their mental health more. 
+  
+  This experimental design aims to spotlight the effect of sleep, the time zone the Uoft students are in on their last term's grades.Using a  2^3 factorial design, with two sets of responses collected, the design will study the effects of three variables on the students’ grades. The three factors are students being a UofT student, living in the Eastern time zone and the hours of sleep. The response variable is the average grade of students from Fall 2020 term. In short, the design will investigate the relation of the factors of the design: Sleep, S (levels: Less than 7 hours, 7 hours or more), EsT, E (levels: yes vs no), Uoft Student, U (levels: Yes vs No) with the students’ grades. 
+ 
+
+Note: The scope of the project has been changed by incorporating the feedback received from the peers and the TA. This design has been chosen to reduce dependence of the variables. 
+The ouctome y of the experiment was the average of two replicated runs.
+
+
+
+##II.Data Analysis: 
+
+Each data value recorded is for the response yield y averaged over two duplicate runs in each of the two weeks.
+```{r, setup, eval=FALSE, message=FALSE}
+
+df <- read.csv("data.csv")
+df
+
+```
+
+###Relevant Numerical Summaries: 
+```{r}
+library(tidyverse)
+summary(df$y)
+```
+###Relevant Data Visualizations: 
+
+A cube plot is shown below to find the value of y for the various combinations of factors E, U, and S at the corners of a cube. 
+
+```{r}
+library("FrF2")
+cp <- lm(y~E*U*S,data=df)
+cubePlot(cp,"E","U","S",main="Cube plot", round=2)
+```
+
+###Calculations:  
+
+#####Main Effects: 
+
+Keeping the levels U and S constant, the main effect for student being in EST, E found to be:
+
+$(85+ 80 + 70+ 78)/4 - (81+87+ 83+70)/4 = -8.75$
+
+
+Similarly, keeping the levels E and S are kept constant the main effect for a student being at UofT, E is:
+
+$((81+ 85+45+80)-(70+ 80+52+83))/4 = 1.5$
+
+
+Again, keeping the levels E and U are kept constant the main effect for sleep, S is:
+
+$((83+78+87+90)- (70-80-81-85))/4 = 5.5$
+
+
+#####Interactions Effects: 
+
+**UofT student vs being in EST:**
+
+When the student is not a UofT student (U=-1) the effect of the student being in EST is:
+
+$((85+ 80) - (81+70))/2 = 7$
+
+When the student is a UofT student (U=1) the effect of the student being in EST is:
+
+$((78+ 90) - (83+87))/2 = -1$
+
+The average difference between these two average differences is called the  two factor interaction between EST and UofT by EU.
+
+$EU = (7- (-1))/2 = 4$ 
+
+The plot below indicates a two-way interaction between Uoft Students and EST: 
+
+```{r}
+interaction.plot(df$E,df$U,df$y,type="l",xlab="EST",trace.label="UofT\nStudent",ylab="Mean Grade Average")
+```
+
+
+To understand the interactions between the other two combinations of factors two-way interaction plots have been shown: 
+
+**UofT student vs Sleep:**
+
+```{r}
+interaction.plot(df$U,df$S,df$y,type="l",xlab="Uoft Student",trace.label="Sleep>= 7h",ylab="Mean Grade Average")
+```
+
+**Sleep vs EST:**
+
+```{r}
+interaction.plot(df$S,df$E,df$y,type="l",xlab="Sleep",trace.label="EST",ylab="Mean Grade Average")
+```
+
+
+####Three factor interactions:  
+
+
+
+*The Estimated variance of the effects is: 4.14 with 8 degrees of freedom*
+
+Each estimated effect such as T, C, K, TC, etc. is a difference between two averages of 8 observations. The variance of a factoril effect for duplicated runs is
+
+$Var(effect)= (1/8 + 1/8)*4.14 = 1.04$
+
+So, the standard error of any factorial effect is:$se(effect) = 1.02$
+
+```{r}
+round(var(df$response1,df$response2)/8, 2) 
+```
+
+####Linear model for factorial design: 
+
+If yi is the yield from the ith run, 
+
+xi1= { +1 if  EST = Yes, 
+    -1 if EST = No } 
+xi2= { +1 if  Uoft Student = yes, 
+    -1 if Uoft Student = No} 
+xi3= { +1 if  S<7, 
+    -1 if S7 }
+
+The linear model found for the design is: 
+$yi = β0 + β1xi1 + β2xi2 + β3xi3 + β4xi1xi2 + β5xi1xi3 + β6xi2xi3 + β7xi1xi2xi3 + ∊i$  
+The variables xi1xi2 is the interaction between Hours EST and Uoft Student. xi1xi3 is the interaction between  EST and Sleep, etc.
+
+```{r}
+fact.mod <-lm(y~U*E*S,data=df)
+round(2*summary(fact.mod)$coefficients,2)
+```
+Here, intercept, U,E, S, UE, US, ES, UES correspond to  β0, β1,β2, β3,β4,β5,β6,β7 respectively. Here, U:S, the interaction between UofT students and their sleep equals to 0 therefore β5=0. This reveals that interaction between these two factors do not affect the average grade of the students. 
+
+If B3 is negative, then the more positive Xi3 is, the more negative its effect on Y becomes vice versa. 
+
+
+##III: Conclusions: 
+
+There has been some discrepancies in the linear model analysis which might have been due to calculation error or internal error in R Studio. 
+
+But from the interaction values and plots it is revealed that there are positive effect of a student being in Uoft and in EST and sleep had the strongest positive correlation with grades. The three factor interaction had the highest positive influence on the grades among the interactions terms.Thereforem S=1, U=1, E=1 is the optimum condition for this experiment.    
+
+
+##IV: Discussion: 
+
+To improve this study more replications can be done and their average would provide more robust results. Other confounding variables like hours being studied can be considered to find possible interactions between treatments and their affect on the grades. 
+
+
+
